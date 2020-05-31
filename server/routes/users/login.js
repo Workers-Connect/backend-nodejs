@@ -4,7 +4,10 @@ const jwt = require('jsonwebtoken');
 const User = require('../../models/User');
 const app = express();
 
-app.post('/login', (req, res) =>{
+
+var cors = require('cors');
+
+app.post('/login', cors() ,(req, res) =>{
     
     let body = req.body;
 
