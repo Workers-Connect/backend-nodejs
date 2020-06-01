@@ -3,9 +3,10 @@ const bcrypt = require('bcrypt');
 const _ = require('underscore');
 const Company = require('../../models/Company');
 const {verifyToken, verifyRole} = require('../../middlewares/auth');
+const cors = require('cors');
 const app = express();
 
-app.get('/compania', verifyToken, (req, res) => {
+app.get('/compania', cors(), verifyToken, (req, res) => {
 
     let from = req.query.from || 0;
     from = Number(from);
@@ -23,8 +24,8 @@ app.get('/compania', verifyToken, (req, res) => {
         .exec((err, campanies) => {
         if(err){
             return res.status(400).json({
-               ok: false,
-               err  
+                ok: false,
+                err  
             });
         }
     
@@ -39,7 +40,7 @@ app.get('/compania', verifyToken, (req, res) => {
 });
 
 // Save campany
-app.post('/compania', (req, res) => {
+app.post('/compania', cors(), (req, res) => {
     let body = req.body;
 
     let campany = new Company({
@@ -50,8 +51,8 @@ app.post('/compania', (req, res) => {
     campany.save((err, campanyDB) => {
         if(err){
             return res.status(400).json({
-               ok: false,
-               err  
+                ok: false,
+                err  
             });
         }
 
@@ -63,15 +64,15 @@ app.post('/compania', (req, res) => {
 });
 
 // Update campany
-app.put('/compania/:id', [verifyToken, verifyRole], (req, res) => {
+app.put('/compania/:id', cors(), [verifyToken, verifyRole], (req, res) => {
     let id = req.params.id;
     let body = _.pick(req.body, ['name', 'cif', 'img', 'status']);
 
     Company.findByIdAndUpdate(id, body, {new: true, runValidators: true}, (err, campanyBD) => {
         if(err){
             return res.status(400).json({
-               ok: false,
-               err  
+                ok: false,
+                err  
             });
         }
 
@@ -83,13 +84,13 @@ app.put('/compania/:id', [verifyToken, verifyRole], (req, res) => {
 });
 
 // Unabled campany
-app.delete('/compania/:id', [verifyToken, verifyRole], (req, res) => {
+app.delete('/compania/:id', cors(), [verifyToken, verifyRole], (req, res) => {
     let id = req.params.id;
     Company.findByIdAndUpdate(id, {status: false}, {new: true}, (err, campanyBD) => {
         if(err){
             return res.status(400).json({
-               ok: false,
-               err  
+                ok: false,
+                err  
             });
         }
 
@@ -99,7 +100,7 @@ app.delete('/compania/:id', [verifyToken, verifyRole], (req, res) => {
                 err:{
                     message: 'Empresa no encontrada'
                 } 
-             });
+            });
         }
         
         res.json({

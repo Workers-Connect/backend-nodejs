@@ -3,9 +3,10 @@ const bcrypt = require('bcrypt');
 const _ = require('underscore');
 const User = require('../../models/User');
 const {verifyToken, verifyRole} = require('../../middlewares/auth');
+const cors = require('cors');
 const app = express();
 
-app.get('/usuario', verifyToken, (req, res) => {
+app.get('/usuario', cors(), verifyToken, (req, res) => {
 
     let from = req.query.from || 0;
     from = Number(from);
@@ -24,8 +25,8 @@ app.get('/usuario', verifyToken, (req, res) => {
         .exec((err, users) => {
         if(err){
             return res.status(400).json({
-               ok: false,
-               err  
+                ok: false,
+                err  
             });
         }
     
@@ -40,7 +41,7 @@ app.get('/usuario', verifyToken, (req, res) => {
 });
 
 // Save user
-app.post('/usuario', (req, res) => {
+app.post('/usuario', cors(), (req, res) => {
     let body = req.body;
 
     let user = new User({
@@ -54,8 +55,8 @@ app.post('/usuario', (req, res) => {
     user.save((err, userDB) => {
         if(err){
             return res.status(400).json({
-               ok: false,
-               err  
+                ok: false,
+                err  
             });
         }
 
@@ -67,15 +68,15 @@ app.post('/usuario', (req, res) => {
 });
 
 // Update user
-app.put('/usuario/:id', [verifyToken, verifyRole], (req, res) => {
+app.put('/usuario/:id', cors(), [verifyToken, verifyRole], (req, res) => {
     let id = req.params.id;
     let body = _.pick(req.body, ['name', 'email', 'img', 'role', 'status']);
 
     User.findByIdAndUpdate(id, body, {new: true, runValidators: true}, (err, userBD) => {
         if(err){
             return res.status(400).json({
-               ok: false,
-               err  
+                ok: false,
+                err  
             });
         }
 
@@ -87,13 +88,13 @@ app.put('/usuario/:id', [verifyToken, verifyRole], (req, res) => {
 });
 
 // Unabled user
-app.delete('/usuario/:id', [verifyToken, verifyRole], (req, res) => {
+app.delete('/usuario/:id', cors(), [verifyToken, verifyRole], (req, res) => {
     let id = req.params.id;
     User.findByIdAndUpdate(id, {status: false}, {new: true}, (err, userBD) => {
         if(err){
             return res.status(400).json({
-               ok: false,
-               err  
+                ok: false,
+                err  
             });
         }
 
@@ -103,7 +104,7 @@ app.delete('/usuario/:id', [verifyToken, verifyRole], (req, res) => {
                 err:{
                     message: 'Usuario no encontrado'
                 } 
-             });
+            });
         }
         
         res.json({

@@ -2,10 +2,8 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../../models/User');
+const cors = require('cors');
 const app = express();
-
-
-var cors = require('cors');
 
 app.post('/login', cors() ,(req, res) =>{
     
@@ -14,8 +12,8 @@ app.post('/login', cors() ,(req, res) =>{
     User.findOne({email: body.email}, (err, user) => {
         if(err){
             return res.status(500).json({
-               ok: false,
-               err  
+                ok: false,
+                err  
             });
         }
 
