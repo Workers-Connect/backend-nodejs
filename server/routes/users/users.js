@@ -6,22 +6,22 @@ const {verifyToken, verifyRole} = require('../../middlewares/auth');
 const cors = require('cors');
 const app = express();
 
-app.get('/usuario', cors(), verifyToken, (req, res) => {
+app.get('/usuario', cors(), [verifyToken], (req, res) => {
 
-    let from = req.query.from || 0;
+    /*let from = req.query.from || 0;
     from = Number(from);
 
-    let limit = req.query.limit || 5;
+    let limit = req.query.limit || 100;
     limit = Number(limit);
-
+    */
     let conditions = {
         status: true
     }
 
     User.find(conditions, 'name email role company status')
         .populate('company','name')
-        .skip(from)
-        .limit(limit)
+        //.skip(from)
+        //.limit(limit)
         .exec((err, users) => {
         if(err){
             return res.status(400).json({
@@ -36,6 +36,25 @@ app.get('/usuario', cors(), verifyToken, (req, res) => {
                 users,
                 sumUsers
             });
+        });
+    });
+});
+
+// Details user
+app.get('/usuario/:id', cors(), [verifyToken], (req, res) => {
+    let id = req.params.id;
+
+    User.findById(id, (err, userBD) => {
+        if(err){
+            return res.status(400).json({
+                ok: false,
+                err  
+            });
+        }
+
+        res.json({
+            ok: true,
+            usuario: userBD
         });
     });
 });
@@ -72,7 +91,7 @@ app.put('/usuario/:id', cors(), [verifyToken, verifyRole], (req, res) => {
     let id = req.params.id;
     let body = _.pick(req.body, ['name', 'email', 'img', 'role', 'status']);
 
-    User.findByIdAndUpdate(id, body, {new: true, runValidators: true}, (err, userBD) => {
+    User.findByIdAndUpdate(id, body, {new: true, runValidators: true, context: 'query'}, (err, userBD) => {
         if(err){
             return res.status(400).json({
                 ok: false,
