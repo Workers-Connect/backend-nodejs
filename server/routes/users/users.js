@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const _ = require('underscore');
 const User = require('../../models/User');
+const RecoveryPassword = require('../../models/RecoveryPassword');
 const {verifyToken, verifyRole} = require('../../middlewares/auth');
 const cors = require('cors');
 const app = express();
@@ -89,7 +90,19 @@ app.post('/usuario', cors(), (req, res) => {
 // Update user
 app.put('/usuario/:id', cors(), [verifyToken, verifyRole], (req, res) => {
     let id = req.params.id;
-    let body = _.pick(req.body, ['name', 'email', 'img', 'role', 'status']);
+    let body = _.pick(req.body, ['name', 'email', 'img', 'role', 'status', 'password']);
+
+    if (body.password == '') {
+        body = {
+            img: body.img,
+            name: body.name,
+            email: body.email,
+            role: body.role,
+            status: body.status
+        }
+    } else {
+        body.password = bcrypt.hashSync(body.password, 10);
+    }
 
     User.findByIdAndUpdate(id, body, {new: true, runValidators: true, context: 'query'}, (err, userBD) => {
         if(err){
@@ -129,6 +142,45 @@ app.delete('/usuario/:id', cors(), [verifyToken, verifyRole], (req, res) => {
         res.json({
             ok: true,
             userBD
+        });
+    });
+});
+
+// Change password user
+app.put('/cambiar-clave/:id', cors(), (req, res) => {
+    let id = req.params.id;
+    let body = _.pick(req.body, ['password']);
+
+    RecoveryPassword.findByIdAndDelete(id, (err, recoveryPasswordDB) => {
+
+        if(err){
+            return res.status(400).json({
+                ok: false,
+                err  
+            });
+        }
+
+        if(!recoveryPasswordDB){
+            return res.status(400).json({
+                ok: false,
+                err:{
+                    message: 'La petición a expirado'
+                } 
+            });
+        }
+
+        User.findByIdAndUpdate(recoveryPasswordDB.user, {password: bcrypt.hashSync(body.password, 10)}, {new: true}, (err, userBD) => {
+            if(err){
+                return res.status(400).json({
+                    ok: false,
+                    err  
+                });
+            }
+    
+            res.json({
+                ok: true,
+                usuario: userBD
+            });
         });
     });
 });
