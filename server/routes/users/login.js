@@ -50,7 +50,6 @@ app.post('/login', cors() ,(req, res) =>{
 });
 
 app.post('/recordar-contrasena', cors() ,(req, res) =>{
-    
     let body = req.body;
 
     User.findOne({email: body.email}, (err, user) => {
@@ -116,7 +115,7 @@ app.get('/recordar-contrasena/:id', cors() ,(req, res) =>{
 
         res.json({
             ok: true,
-            id: recoveryPasswordDB._id
+            code: recoveryPasswordDB.code
         });
     });
 });

@@ -90,18 +90,17 @@ app.post('/usuario', cors(), (req, res) => {
 // Update user
 app.put('/usuario/:id', cors(), [verifyToken, verifyRole], (req, res) => {
     let id = req.params.id;
-    let body = _.pick(req.body, ['name', 'email', 'img', 'role', 'status', 'password']);
+    let body = _.pick(req.body, ['name', 'email', 'img', 'role', 'password']);
 
-    if (body.password == '') {
+    if (body.password !== 'undefined') {
+        body.password = bcrypt.hashSync(body.password, 10);
+    } else {
         body = {
             img: body.img,
             name: body.name,
             email: body.email,
-            role: body.role,
-            status: body.status
+            role: body.role
         }
-    } else {
-        body.password = bcrypt.hashSync(body.password, 10);
     }
 
     User.findByIdAndUpdate(id, body, {new: true, runValidators: true, context: 'query'}, (err, userBD) => {
