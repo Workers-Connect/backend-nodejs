@@ -92,8 +92,14 @@ app.put('/usuario/:id', cors(), [verifyToken, verifyRole], (req, res) => {
     let id = req.params.id;
     let body = _.pick(req.body, ['name', 'email', 'img', 'role', 'password']);
 
-    if (body.password !== 'undefined') {
-        body.password = bcrypt.hashSync(body.password, 10);
+    if (body.password !== '') {
+        body = {
+            img: body.img,
+            name: body.name,
+            email: body.email,
+            role: body.role,
+            password: bcrypt.hashSync(body.password, 10)
+        }
     } else {
         body = {
             img: body.img,
